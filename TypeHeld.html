@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TypeHeld 🐱</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #d6eaf8; --bg2: #eaf4fb; --card: #ffffff;
+  --primary: #2980b9; --primary-light: #5dade2;
+  --accent: #f39c12; --accent2: #27ae60;
+  --danger: #e74c3c; --text: #1a3a52; --text-muted: #5d8aa8;
+  --shadow: 0 4px 20px rgba(41,128,185,0.13); --radius: 18px;
+  --key-bg: #eaf4fb; --key-border: #aed6f1;
+  --left-bg: #dbeffe; --left-border: #aed6f1; --left-text: #1a6fa8;
+  --right-bg: #fef4d8; --right-border: #f9cc7a; --right-text: #8a6000;
+  --home-glow: #2980b9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#0d2137;--bg2:#112840;--card:#163352;--primary:#5dade2;
+    --primary-light:#85c1e9;--accent:#f5b942;--text:#e8f4fd;
+    --text-muted:#85c1e9;--shadow:0 4px 20px rgba(0,0,0,0.4);
+    --key-bg:#1a3d5c;--key-border:#2e6a9e;
+    --left-bg:#1a3d5c;--left-border:#2e6a9e;--left-text:#85c1e9;
+    --right-bg:#3d3010;--right-border:#8a6000;--right-text:#f5b942;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
+body{min-height:100%;display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+
+/* HEADER */
+header{background:var(--card);box-shadow:var(--shadow);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-size:1.8rem;line-height:1}
+.app-title{font-size:1.4rem;font-weight:900;color:var(--primary)}
+.app-subtitle{font-size:0.8rem;color:var(--text-muted);font-weight:600}
+.header-stats{margin-left:auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.stat-chip{background:var(--bg2);border-radius:20px;padding:5px 12px;font-size:0.82rem;font-weight:700;color:var(--primary)}
+.timer-chip{background:var(--accent);color:#fff;border-radius:20px;padding:5px 12px;font-size:0.85rem;font-weight:800}
+
+/* SESSION BAR */
+.session-bar-track{height:6px;background:var(--bg2);width:100%}
+.session-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width 1s linear}
+
+/* LAYOUT */
+main{flex:1;display:flex;gap:16px;padding:16px;max-width:1100px;margin:0 auto;width:100%}
+.left-panel{flex:1;display:flex;flex-direction:column;gap:14px;min-width:0}
+.right-panel{width:260px;display:flex;flex-direction:column;gap:14px;flex-shrink:0}
+
+/* CARDS */
+.card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.card-title{font-size:0.95rem;font-weight:800;color:var(--primary);margin-bottom:12px;text-align:center}
+
+/* MASCOT */
+.mascot-area{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow)}
+.cat-svg{width:64px;height:64px;flex-shrink:0;transition:transform 0.3s}
+.speech-bubble{background:var(--bg2);border-radius:12px;padding:10px 14px;position:relative;font-size:0.9rem;font-weight:700;color:var(--text);flex:1}
+.speech-bubble::before{content:'';position:absolute;left:-10px;top:50%;transform:translateY(-50%);border:5px solid transparent;border-right-color:var(--bg2)}
+
+/* PROGRESS */
+.progress-label{font-size:0.82rem;font-weight:700;color:var(--text-muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.progress-bar-track{background:var(--bg2);border-radius:10px;height:12px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--primary-light),var(--primary));transition:width 0.5s ease}
+
+/* LESSON */
+.lesson-header{font-size:1rem;font-weight:800;color:var(--primary);text-align:center;margin-bottom:10px}
+.exercise-display{font-size:1.6rem;font-weight:900;letter-spacing:0.08em;text-align:center;min-height:52px;display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:2px;padding:12px 16px;background:var(--bg2);border-radius:12px;line-height:1.7;word-break:keep-all}
+.exercise-display.short{font-size:2rem;letter-spacing:0.15em}
+.word-group{display:inline-flex;flex-wrap:nowrap;margin:0 2px}
+.char-upcoming{color:var(--text-muted);opacity:0.4}
+.char-current{color:var(--primary);background:rgba(41,128,185,0.15);border-radius:4px;padding:0 3px;animation:blink 1s infinite}
+.char-correct{color:var(--accent2)}
+.char-wrong{color:var(--danger);text-decoration:underline wavy}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+.type-input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.tap-btn{border:2px dashed var(--key-border);background:var(--bg2);border-radius:10px;padding:8px 20px;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text-muted);cursor:pointer;transition:background 0.2s;margin-top:4px}
+.tap-btn:hover{background:var(--bg)}
+
+.stats-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.mini-stat{background:var(--bg2);border-radius:10px;padding:6px 14px;text-align:center}
+.mini-stat .val{display:block;font-size:1.2rem;font-weight:900;color:var(--primary)}
+.mini-stat .lbl{display:block;font-size:0.7rem;font-weight:600;color:var(--text-muted)}
+
+/* KEYBOARD */
+.kb-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.kb-row{display:flex;gap:4px;justify-content:center}
+.kb-key{min-width:34px;height:34px;border-radius:7px;border:2px solid var(--key-border);background:var(--key-bg);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:var(--text-muted);user-select:none;transition:all 0.12s;position:relative}
+.kb-key.lh{border-color:var(--left-border);background:var(--left-bg);color:var(--left-text)}
+.kb-key.rh{border-color:var(--right-border);background:var(--right-bg);color:var(--right-text)}
+.kb-key.lh.home{border:3px solid #1a6fa8;background:#b3d9f5;color:#0d3d6b;font-weight:900}
+.kb-key.rh.home{border:3px solid #b8860b;background:#fce29a;color:#5a3e00;font-weight:900}
+.kb-key.space-key{min-width:110px}
+.kb-key.active-key{transform:scale(1.2);box-shadow:0 0 0 3px var(--primary),0 4px 14px rgba(41,128,185,0.4);border-color:var(--primary);z-index:2}
+.kb-legend{display:flex;gap:14px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.kb-legend-item{display:flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:700;color:var(--text-muted)}
+.kb-legend-dot{width:12px;height:12px;border-radius:3px}
+
+/* HAND ANIMATION */
+.hand-anim-area{text-align:center}
+.hand-svg-wrap{display:flex;justify-content:center;gap:10px;margin-bottom:8px}
+.hand-svg{width:90px;height:110px}
+.hand-label{font-size:0.78rem;font-weight:700;color:var(--text-muted);text-align:center}
+.finger{transition:fill 0.3s,transform 0.3s;transform-origin:bottom center}
+.finger.active{fill:#f39c12 !important;animation:fingerTap 0.4s ease}
+@keyframes fingerTap{0%{transform:scaleY(1)}40%{transform:scaleY(0.8)}100%{transform:scaleY(1)}}
+
+/* LEVELS */
+.levels-list{display:flex;flex-direction:column;gap:6px;max-height:400px;overflow-y:auto;padding-right:4px}
+.levels-list::-webkit-scrollbar{width:6px}
+.levels-list::-webkit-scrollbar-track{background:var(--bg2);border-radius:3px}
+.levels-list::-webkit-scrollbar-thumb{background:var(--primary-light);border-radius:3px}
+.level-btn{border:none;border-radius:10px;padding:9px 12px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:700;text-align:left;transition:transform 0.12s,box-shadow 0.12s;display:flex;align-items:center;gap:8px;width:100%}
+.level-btn:hover:not(:disabled){transform:translateX(3px);box-shadow:var(--shadow)}
+.level-btn.unlocked{background:var(--bg2);color:var(--text)}
+.level-btn.current-level{background:var(--primary);color:#fff}
+.level-btn.completed{background:#d5f5e3;color:#1e8449;border:2px solid #27ae60}
+.level-btn:disabled{opacity:0.4;cursor:not-allowed}
+.level-num{font-size:0.7rem;opacity:0.6;min-width:18px}
+.level-name{flex:1}
+.level-stars{font-size:0.75rem}
+
+/* BADGES */
+.badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.badge-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:0.65rem;font-weight:700;color:var(--text-muted);text-align:center}
+.badge-icon{font-size:1.6rem;filter:grayscale(1) opacity(0.25);transition:filter 0.5s}
+.badge-icon.earned{filter:none;animation:pop 0.5s cubic-bezier(.17,.67,.3,1.5)}
+@keyframes pop{0%{transform:scale(0.5)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+/* RESULT */
+.result-overlay{position:fixed;inset:0;background:rgba(10,30,60,0.6);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.result-box{background:var(--card);border-radius:24px;padding:32px;box-shadow:0 8px 40px rgba(0,0,0,0.3);text-align:center;max-width:360px;width:100%;animation:slideUp 0.4s cubic-bezier(.17,.67,.3,1.3)}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.result-cat{font-size:3rem;margin-bottom:6px}
+.result-title{font-size:1.4rem;font-weight:900;color:var(--primary);margin-bottom:4px}
+.result-msg{font-size:0.88rem;color:var(--text-muted);font-weight:600;margin-bottom:14px}
+.stars-display{font-size:2.4rem;margin-bottom:16px;letter-spacing:4px}
+.result-stat{font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:14px}
+.btn-primary{background:var(--primary);color:#fff;border:none;border-radius:12px;padding:12px 26px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:transform 0.12s,box-shadow 0.12s;margin:4px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(41,128,185,0.35)}
+.btn-secondary{background:var(--bg2);color:var(--primary);border:2px solid var(--primary);border-radius:12px;padding:10px 22px;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:transform 0.12s;margin:4px}
+.btn-secondary:hover{transform:translateY(-2px)}
+
+/* CONFETTI */
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:99;overflow:hidden}
+.confetti-piece{position:absolute;border-radius:2px;animation:confettiFall linear forwards}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+/* CAT SECTION HEADER */
+.section-group{display:flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:800;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em}
+
+@media(max-width:700px){
+  main{flex-direction:column}
+  .right-panel{width:100%}
+  .exercise-display{font-size:1.5rem}
+  .kb-key{min-width:26px;height:28px;font-size:0.65rem}
+  .kb-key.space-key{min-width:80px}
+}
+</style>
+</head>
+<body>
+
+<div class="session-bar-track"><div class="session-bar-fill" id="sessionBar" style="width:0%"></div></div>
+
+<header>
+  <div class="logo">🐱</div>
+  <div><div class="app-title">TypeHeld</div><div class="app-subtitle">Leer typen met Snurr!</div></div>
+  <div class="header-stats">
+    <div class="stat-chip">⭐ <span id="totalStars">0</span></div>
+    <div class="stat-chip">🏅 <span id="totalBadges">0</span></div>
+    <div class="timer-chip">⏱ <span id="sessionTimerDisplay">15:00</span></div>
+    <button onclick="resetProgress()" title="Voortgang wissen" style="background:none;border:1px solid var(--text-muted);border-radius:20px;padding:4px 10px;font-size:0.75rem;font-weight:700;color:var(--text-muted);cursor:pointer">🗑 Reset</button>
+  </div>
+</header>
+
+<main>
+<!-- LEFT PANEL -->
+<div class="left-panel">
+
+  <!-- MASCOT -->
+  <div class="mascot-area">
+    <svg class="cat-svg" id="catSvg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="68" rx="26" ry="22" fill="#f0c040"/>
+      <circle cx="50" cy="38" r="24" fill="#f0c040"/>
+      <polygon points="28,18 20,2 38,12" fill="#f0c040"/>
+      <polygon points="72,18 80,2 62,12" fill="#f0c040"/>
+      <polygon points="29,16 23,6 37,13" fill="#f9a0a0"/>
+      <polygon points="71,16 77,6 63,13" fill="#f9a0a0"/>
+      <circle cx="40" cy="36" r="5" fill="#222"/>
+      <circle cx="60" cy="36" r="5" fill="#222"/>
+      <circle cx="41.5" cy="34.5" r="1.5" fill="#fff"/>
+      <circle cx="61.5" cy="34.5" r="1.5" fill="#fff"/>
+      <ellipse cx="50" cy="44" rx="4" ry="2.5" fill="#f9a0a0"/>
+      <path d="M46 46 Q50 50 54 46" stroke="#c0725a" stroke-width="1.5" fill="none"/>
+      <line x1="20" y1="42" x2="42" y2="44" stroke="#888" stroke-width="1.2"/>
+      <line x1="20" y1="46" x2="42" y2="46" stroke="#888" stroke-width="1.2"/>
+      <line x1="80" y1="42" x2="58" y2="44" stroke="#888" stroke-width="1.2"/>
+      <line x1="80" y1="46" x2="58" y2="46" stroke="#888" stroke-width="1.2"/>
+      <path d="M24 80 Q8 90 18 100 Q30 110 34 90" stroke="#f0c040" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M42 58 Q50 62 58 58" stroke="#d4a000" stroke-width="2" fill="none"/>
+      <path d="M40 64 Q50 69 60 64" stroke="#d4a000" stroke-width="2" fill="none"/>
+      <ellipse cx="36" cy="86" rx="9" ry="6" fill="#f0c040"/>
+      <ellipse cx="64" cy="86" rx="9" ry="6" fill="#f0c040"/>
+    </svg>
+    <div class="speech-bubble" id="catMessage">Hoi! Ik ben Snurr! 🐾 Kies een les aan de rechterkant om te beginnen!</div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="card">
+    <div class="progress-label">
+      <span id="lessonLabel">Kies een les</span>
+      <span id="progressText">-</span>
+    </div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+  </div>
+
+  <!-- HAND ANIMATION -->
+  <div class="card" id="handAnimCard">
+    <div class="card-title" id="handAnimTitle">🖐️ Vingerpositie</div>
+    <div class="hand-anim-area">
+      <div class="hand-svg-wrap">
+        <!-- LEFT HAND SVG -->
+        <div>
+          <svg class="hand-svg" id="leftHandSvg" viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg">
+            <!-- Palm -->
+            <ellipse cx="45" cy="80" rx="32" ry="24" fill="#fde8c8"/>
+            <!-- Fingers: pinky=Q, ring=S, middle=D, index=F, thumb=space -->
+            <rect id="lf-pinky" class="finger" x="10" y="28" width="13" height="52" rx="6" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5"/>
+            <rect id="lf-ring" class="finger" x="25" y="20" width="13" height="58" rx="6" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5"/>
+            <rect id="lf-middle" class="finger" x="40" y="16" width="13" height="62" rx="6" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5"/>
+            <rect id="lf-index" class="finger" x="55" y="22" width="13" height="56" rx="6" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5"/>
+            <ellipse id="lf-thumb" class="finger" cx="76" cy="72" rx="9" ry="14" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5" transform="rotate(-20 76 72)"/>
+            <!-- Labels -->
+            <text x="16" y="100" font-size="7" fill="#888" font-weight="bold" text-anchor="middle">Q</text>
+            <text x="31" y="100" font-size="7" fill="#888" font-weight="bold" text-anchor="middle">S</text>
+            <text x="46" y="100" font-size="7" fill="#888" font-weight="bold" text-anchor="middle">D</text>
+            <text x="61" y="100" font-size="7" fill="#888" font-weight="bold" text-anchor="middle">F</text>
+          </svg>
+          <div class="hand-label">Linkerhand</div>
+        </div>
+        <!-- RIGHT HAND SVG -->
+        <div>
+          <svg class="hand-svg" id="rightHandSvg" viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
+            <ellipse cx="45" cy="80" rx="32" ry="24" fill="#fde8c8"/>
+            <rect id="rf-pinky" class="finger" x="10" y="28" width="13" height="52" rx="6" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5"/>
+            <rect id="rf-ring" class="finger" x="25" y="20" width="13" height="58" rx="6" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5"/>
+            <rect id="rf-middle" class="finger" x="40" y="16" width="13" height="62" rx="6" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5"/>
+            <rect id="rf-index" class="finger" x="55" y="22" width="13" height="56" rx="6" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5"/>
+            <ellipse id="rf-thumb" class="finger" cx="76" cy="72" rx="9" ry="14" fill="#fde8c8" stroke="#d4a070" stroke-width="1.5" transform="rotate(-20 76 72)"/>
+            <!-- Labels (mirrored so text reads correctly) -->
+            <text x="16" y="100" font-size="7" fill="#888" font-weight="bold" text-anchor="middle" style="transform:scaleX(-1);transform-box:fill-box">M</text>
+            <text x="31" y="100" font-size="7" fill="#888" font-weight="bold" text-anchor="middle" style="transform:scaleX(-1);transform-box:fill-box">L</text>
+            <text x="46" y="100" font-size="7" fill="#888" font-weight="bold" text-anchor="middle" style="transform:scaleX(-1);transform-box:fill-box">K</text>
+            <text x="61" y="100" font-size="7" fill="#888" font-weight="bold" text-anchor="middle" style="transform:scaleX(-1);transform-box:fill-box">J</text>
+          </svg>
+          <div class="hand-label">Rechterhand</div>
+        </div>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-muted);font-weight:600;text-align:center" id="handHint">Leg je vingers op de thuisrij: Q S D F — J K L M</div>
+    </div>
+  </div>
+
+  <!-- KEYBOARD -->
+  <div class="card">
+    <div class="card-title">⌨️ AZERTY toetsenbord</div>
+    <div class="kb-wrap" id="keyboard"></div>
+    <div class="kb-legend">
+      <div class="kb-legend-item"><div class="kb-legend-dot" style="background:var(--left-bg);border:2px solid var(--left-border)"></div>Linkerhand</div>
+      <div class="kb-legend-item"><div class="kb-legend-dot" style="background:var(--right-bg);border:2px solid var(--right-border)"></div>Rechterhand</div>
+      <div class="kb-legend-item"><div class="kb-legend-dot" style="background:#b3d9f5;border:3px solid #1a6fa8"></div>Thuisrij (donkerder)</div>
+    </div>
+  </div>
+
+  <!-- EXERCISE -->
+  <div class="card">
+    <div class="lesson-header" id="lessonTitle">Kies een les ➡️</div>
+    <div class="exercise-display" id="exerciseDisplay">
+      <span style="color:var(--text-muted);font-size:1rem">Kies een les aan de rechterkant!</span>
+    </div>
+    <div style="display:flex;justify-content:center;margin-top:8px">
+      <button class="tap-btn" id="tapToType" onclick="document.getElementById('hiddenInput').focus()">👆 Tik hier om te typen</button>
+    </div>
+    <input type="text" class="type-input" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <div class="stats-row">
+      <div class="mini-stat"><span class="val" id="statCorrect">0</span><span class="lbl">✅ Goed</span></div>
+      <div class="mini-stat"><span class="val" id="statWrong">0</span><span class="lbl">❌ Fout</span></div>
+      <div class="mini-stat"><span class="val" id="statAccuracy">-</span><span class="lbl">🎯 Nauwkeurig</span></div>
+      <div class="mini-stat"><span class="val" id="statWpm">-</span><span class="lbl">⚡ WPM</span></div>
+    </div>
+  </div>
+
+</div><!-- end left-panel -->
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+
+  <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+    <div class="card-title">📚 Lessen (50)</div>
+    <div class="levels-list" id="levelsGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏅 Badges</div>
+    <div class="badges-grid" id="badgesRow"></div>
+  </div>
+
+</div>
+</main>
+
+<!-- RESULT -->
+<div class="result-overlay" id="resultOverlay" style="display:none">
+  <div class="result-box">
+    <div class="result-cat" id="resultCat">😸</div>
+    <div class="result-title" id="resultTitle">Super!</div>
+    <div class="result-msg" id="resultMsg"></div>
+    <div class="stars-display" id="resultStars">⭐⭐⭐</div>
+    <div class="result-stat" id="resultStat"></div>
+    <button class="btn-primary" onclick="nextExercise()">Volgende ➡️</button>
+    <button class="btn-secondary" onclick="closeResult()">Kies andere les</button>
+  </div>
+</div>
+
+<!-- LES VOLTOOID OVERLAY -->
+<div class="result-overlay" id="lessonCompleteOverlay" style="display:none">
+  <div class="result-box" style="max-width:400px">
+    <div style="font-size:3rem">🎊</div>
+    <div class="result-title" id="lcTitle">Les voltooid!</div>
+    <div class="result-msg" id="lcMsg"></div>
+    <div class="stars-display" id="lcStars"></div>
+    <div class="result-stat" id="lcStat"></div>
+    <button class="btn-primary" onclick="continueLesson()">🔁 Nog eens oefenen op deze les</button>
+    <button class="btn-primary" id="lcNextBtn" onclick="goToNextLesson()" style="background:var(--accent2);margin-top:4px">➡️ Volgende les</button>
+    <button class="btn-secondary" onclick="closeLessonComplete()" style="margin-top:6px">📚 Kies zelf een les</button>
+  </div>
+</div>
+
+<!-- 10 MIN TYPEN MELDING -->
+<div class="result-overlay" id="typingTimeOverlay" style="display:none">
+  <div class="result-box" style="max-width:380px">
+    <div style="font-size:3rem">⏱️</div>
+    <div class="result-title">10 minuten getypt!</div>
+    <div class="result-msg">Wauw, je hebt al 10 minuten effectief getypt! Dat is genoeg voor vandaag — je vingers hebben rust verdiend! 🐾</div>
+    <button class="btn-primary" onclick="closeTypingTime()">Nog even doorgaan 💪</button>
+    <button class="btn-secondary" onclick="closeTypingTime()">Stoppen voor vandaag</button>
+  </div>
+</div>
+
+<!-- ENTRY TEST OVERLAY -->
+<div class="result-overlay" id="entryTestOverlay" style="display:none">
+  <div class="result-box" style="max-width:420px">
+    <div class="result-cat" id="entryTestCat">🐱</div>
+    <div class="result-title" id="entryTestTitle">Klaar voor de les?</div>
+    <div class="result-msg" id="entryTestMsg">Typ eerst 3 korte herhalingsoefeningen!</div>
+    <div id="entryTestExArea" style="margin:14px 0">
+      <div style="font-size:0.82rem;font-weight:700;color:var(--text-muted);margin-bottom:6px">
+        Oefening <span id="entryQ">1</span> van 3
+      </div>
+      <div class="exercise-display" id="entryTestDisplay" style="cursor:pointer"
+           onclick="document.getElementById('entryInput').focus()"></div>
+      <div style="display:flex;justify-content:center;margin-top:8px">
+        <button class="tap-btn" onclick="document.getElementById('entryInput').focus()">👆 Tik hier om te typen</button>
+      </div>
+      <input type="text" class="type-input" id="entryInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <div style="margin-top:10px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <div class="mini-stat"><span class="val" id="entryCorrect">0</span><span class="lbl">✅ Goed</span></div>
+        <div class="mini-stat"><span class="val" id="entryWrong">0</span><span class="lbl">❌ Fout</span></div>
+        <div class="mini-stat"><span class="val" id="entryAcc">-</span><span class="lbl">🎯 Score</span></div>
+      </div>
+    </div>
+    <!-- Result of entry test -->
+    <div id="entryTestResult" style="display:none">
+      <div class="stars-display" id="entryStars"></div>
+      <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:10px" id="entryResultMsg"></div>
+      <button class="btn-primary" id="entryGoBtn" onclick="proceedToLesson()"></button>
+      <button class="btn-secondary" id="entryRepeatBtn" style="display:none" onclick="goToRecommended()"></button>
+      <button class="btn-secondary" style="margin-top:6px" onclick="closeEntryTest()">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// AZERTY KEYBOARD LAYOUT
+// ═══════════════════════════════════════════════
+// Row 1: A Z E R T | Y U I O P
+// Row 2: Q S D F G | H J K L M
+// Row 3:  W X C V B | N  (+ space)
+// Left hand: A Z E R T  Q S D F G  W X C V B
+// Right hand: Y U I O P  H J K L M  N
+// Home row: Q S D F | J K L M
+// Thumb: space (both)
+
+// Belgisch AZERTY — correcte lay-out en handverdeling
+// Rij 1 (bovenrij):  A Z E R T | Y U I O P
+// Rij 2 (thuisrij):  Q S D F G | H J K L M
+// Rij 3 (onderrij):  W X C V   | B N
+// Linkerhand : A Z E R T  Q S D F G  W X C V
+// Rechterhand: Y U I O P  H J K L M  B N
+// Thuisrij   : Q S D F (links) — J K L M (rechts)
+const KB_LAYOUT = [
+  { keys: [
+    {k:'A',hand:'l'},{k:'Z',hand:'l'},{k:'E',hand:'l'},{k:'R',hand:'l'},{k:'T',hand:'l'},
+    {k:'Y',hand:'r'},{k:'U',hand:'r'},{k:'I',hand:'r'},{k:'O',hand:'r'},{k:'P',hand:'r'}
+  ], indent: 0 },
+  { keys: [
+    {k:'Q',hand:'l',home:true},{k:'S',hand:'l',home:true},{k:'D',hand:'l',home:true},
+    {k:'F',hand:'l',home:true},{k:'G',hand:'l'},
+    {k:'H',hand:'r'},{k:'J',hand:'r',home:true},{k:'K',hand:'r',home:true},
+    {k:'L',hand:'r',home:true},{k:'M',hand:'r',home:true}
+  ], indent: 18 },
+  { keys: [
+    {k:'W',hand:'l'},{k:'X',hand:'l'},{k:'C',hand:'l'},{k:'V',hand:'l'},
+    {k:'B',hand:'r'},{k:'N',hand:'r'}
+  ], indent: -80 },
+];
+
+// Finger map — Belgisch AZERTY
+// Linkerhand:
+//   Pink       : Q A W
+//   Ringvinger : S Z X
+//   Middelvinger: D E C
+//   Wijsvinger : F G R T V (F=thuisrij, G/T/R/V = uitreiken)
+// Rechterhand:
+//   Wijsvinger : J H Y U B N (J=thuisrij, H/Y/U/B/N = uitreiken)
+//   Middelvinger: K I
+//   Ringvinger : L O
+//   Pink       : M P
+//   Duim       : spatie
+const FINGER_MAP = {
+  // linkerhand
+  'q':'lf-pinky','a':'lf-pinky','w':'lf-pinky',
+  's':'lf-ring','z':'lf-ring','x':'lf-ring',
+  'd':'lf-middle','e':'lf-middle','c':'lf-middle',
+  'f':'lf-index','g':'lf-index','r':'lf-index','t':'lf-index','v':'lf-index',
+  // rechterhand
+  'j':'rf-index','h':'rf-index','y':'rf-index','u':'rf-index','b':'rf-index','n':'rf-index',
+  'k':'rf-middle','i':'rf-middle',
+  'l':'rf-ring','o':'rf-ring',
+  'm':'rf-pinky','p':'rf-pinky',
+  ' ':'lf-thumb',
+};
+
+// ═══════════════════════════════════════════════
+// 50 LESSONS
+// ═══════════════════════════════════════════════
+const LESSONS = [
+// ── BLOK 1: THUISRIJ (4 lessen) ──
+{id:'T1',group:'Thuisrij',emoji:'👈',name:'Les 1 – Linkerhand',
+ hint:'Leg je vingers op Q S D F. Typ elke letter rustig!',
+ exercises:[
+  'qqqq ssss dddd ffff',
+  'qs qs qs qd qd qd qf qf qf',
+  'qsdf qsdf qsdf fdsa fdsa fdsa',
+  'qqss ddff ffdd ssqq qqssddff',
+  'sq dq fq sd fd sf qs qd qf ds fs df',
+ ]},
+{id:'T2',group:'Thuisrij',emoji:'👉',name:'Les 2 – Rechterhand',
+ hint:'Leg je vingers op J K L M. Typ elke letter rustig!',
+ exercises:[
+  'jjjj kkkk llll mmmm',
+  'jk jk jk jl jl jl jm jm jm',
+  'jklm jklm jklm mlkj mlkj mlkj',
+  'jjkk llmm mmll kkjj jjkkllmm',
+  'kj lj mj kl ml km jk jl jm lk mk lm',
+ ]},
+{id:'T3',group:'Thuisrij',emoji:'🤲',name:'Les 3 – Beide handen',
+ hint:'Linkerhand op Q S D F, rechterhand op J K L M. Wissel af!',
+ exercises:[
+  'qj sk dl fm fj dk sl qm',
+  'qjkl sdfm qsdf jklm',
+  'fjdk slqm dkjf mqls',
+  'qsdf jklm qsdf jklm fdsq mlkj',
+  'qj qk ql qm sf sk sl sm df dk dl dm ff fk fl fm',
+ ]},
+{id:'T4',group:'Thuisrij',emoji:'🔁',name:'Les 4 – Thuisrij drill',
+ hint:'Lange herhalingsoefeningen — bouw spiergeheugen op!',
+ exercises:[
+  'qqqq ssss dddd ffff jjjj kkkk llll mmmm',
+  'qsqsqs dfdfddf jkjkjk lmlmlm',
+  'qsdf qsdf qsdf jklm jklm jklm qsdf jklm',
+  'ffjj ddkk ssll qqmm mmqq llss kkdd jjff',
+  'qjskdlfm mqlfksdj fjdkslqm mlqsdfkj',
+ ]},
+
+// ── BLOK 2: THUISRIJ + BOVENRIJ (5 lessen) ──
+{id:'B1',group:'Bovenrij',emoji:'⬆️',name:'Les 5 – F en U (wijsvingers omhoog)',
+ hint:'Vanuit F ga je omhoog naar R en T. Vanuit J ga je omhoog naar U en Y.',
+ exercises:[
+  'ffff rrrr tttt jjjj uuuu yyyy',
+  'fr fr fr ft ft ft ju ju ju jy jy jy',
+  'frf ftf juj jyj frft juiy',
+  'rf tf uj yj frf ftf juj jyj',
+  'frtj yuft rfju tyjr frftjuiy',
+ ]},
+{id:'B2',group:'Bovenrij',emoji:'⬆️',name:'Les 6 – D en K (middelvingers omhoog)',
+ hint:'Vanuit D ga je omhoog naar E. Vanuit K ga je omhoog naar I.',
+ exercises:[
+  'dddd eeee kkkk iiii',
+  'de de de de ki ki ki ki',
+  'ded eke kik iki deke kiid',
+  'ed id de ki ded kik dede kiki',
+  'dedk kiie edki iekd deekiid',
+ ]},
+{id:'B3',group:'Bovenrij',emoji:'⬆️',name:'Les 7 – S en L (ringvingers omhoog)',
+ hint:'Vanuit S ga je omhoog naar Z. Vanuit L ga je omhoog naar O.',
+ exercises:[
+  'ssss zzzz llll oooo',
+  'sz sz sz lo lo lo szlo olzs',
+  'szs zszs lol olol szlo olsz',
+  'zs ol sz lo szlo olsz zsol losz',
+  'szlo olsz zslo losZ szolzs oslzo',
+ ]},
+{id:'B4',group:'Bovenrij',emoji:'⬆️',name:'Les 8 – Q en M (pinken omhoog)',
+ hint:'Vanuit Q ga je omhoog naar A. Vanuit M ga je omhoog naar P.',
+ exercises:[
+  'qqqq aaaa mmmm pppp',
+  'qa qa qa mp mp mp qaqa mpmp',
+  'qaq aqa mpm pmp qamp mpqa',
+  'aq pm qa mp aqqa pmmP aqpm pmqa',
+  'qamp mpqa aqpm pmaq qamPmpqa',
+ ]},
+{id:'B5',group:'Bovenrij',emoji:'⬆️',name:'Les 9 – Bovenrij combinatie',
+ hint:'Oefen alle bovenrijvingers samen!',
+ exercises:[
+  'azerty yuiop azertyuiop',
+  'rftj yuik dezs kiop azre uiop',
+  'tryu ioer yurt oper trey uipo',
+  'azer tyui opza erty uiop zaer',
+  'azerty yuiop azertyuiop poiuytreza',
+ ]},
+
+// ── BLOK 3: THUISRIJ + BOVENRIJ + ONDERRIJ (6 lessen) ──
+{id:'O1',group:'Onderrij',emoji:'⬇️',name:'Les 10 – F en J (wijsvingers omlaag)',
+ hint:'Vanuit F ga je omlaag naar V en B. Vanuit J ga je omlaag naar N.',
+ exercises:[
+  'ffff vvvv bbbb jjjj nnnn',
+  'fv fv fv fb fb fb jn jn jn',
+  'fvf fbf jnj vfb njf fvbjn',
+  'vf bf nj fv fb jn fvfb jnjn',
+  'fvbj njfv bfjn vjfb fvbnj',
+ ]},
+{id:'O2',group:'Onderrij',emoji:'⬇️',name:'Les 11 – D en K (middelvingers omlaag)',
+ hint:'Vanuit D ga je omlaag naar C. Vanuit K ga je omlaag naar virgule.',
+ exercises:[
+  'dddd cccc kkkk',
+  'dc dc dc dc kdc dck cdk',
+  'dcd cdc dck kcd dckc kdcd',
+  'cd dc kcd dck cdkd kdcd',
+  'dcdk kdcd cddk dkcd dckdk',
+ ]},
+{id:'O3',group:'Onderrij',emoji:'⬇️',name:'Les 12 – S en L (ringvingers omlaag)',
+ hint:'Vanuit S ga je omlaag naar X. Vanuit L ga je omlaag naar punt.',
+ exercises:[
+  'ssss xxxx llll',
+  'sx sx sx sx lx ls xl xs',
+  'sxs xsx lxl xlx sxlx xlsx',
+  'xs xl sx lx sxlx xlsx',
+  'sxlx xlsx sxls xlxs sxlxls',
+ ]},
+{id:'O4',group:'Onderrij',emoji:'⬇️',name:'Les 13 – Q (pink omlaag)',
+ hint:'Vanuit Q ga je omlaag naar W. Oefenen!',
+ exercises:[
+  'qqqq wwww qwqw wqwq',
+  'qw qw qw wq wq wq qwqw wqwq',
+  'qwq wqw qww wwq qwqwwq',
+  'wq qw qww wqq wqqw qwwq',
+  'qwqwwqqw wqqwqwqw qwwqwqqw',
+ ]},
+{id:'O5',group:'Onderrij',emoji:'⬇️',name:'Les 14 – Onderrij combinatie',
+ hint:'Alle vingers omlaag combineren!',
+ exercises:[
+  'wxcvbn wxcvbn nvcxw wxcv vbnw',
+  'wvcx bncv xwvb cvnb wxcvbn',
+  'vxwb ncvw bvxn wxcvbn nvcxwb',
+  'wxcv cvbn nvwx bxcv nwcv wxbn',
+  'wxcvbn nvcxbw wcxvnb bvxcwn wxcvbnnvcxbw',
+ ]},
+{id:'O6',group:'Onderrij',emoji:'⬇️',name:'Les 15 – Alle rijen samen',
+ hint:'Nu combineer je alle drie de rijen! Terug naar thuisrij na elke letter.',
+ exercises:[
+  'frf ded szs ftf ded juj kik lol',
+  'fvf fbf jnj dcd sxs qwq',
+  'rfvf edcd zxsx tgbf yhnj uiki olp',
+  'azerty wxcvbn qsdfghjklm',
+  'azertyuiopqsdfghjklmwxcvbn',
+ ]},
+
+// ── BLOK 4: EERSTE WOORDJES (10 lessen) ──
+{id:'W1',group:'Woordjes',emoji:'📝',name:'Les 16 – Dieren',
+ hint:'Typ elk woord rustig. Na elk woord is er een spatie!',
+ exercises:[
+  'kat hond vis',
+  'kat hond vis kat hond vis',
+  'muis beer wolf kat hond vis',
+  'slak spin krab vis kat hond',
+  'kat hond vis muis beer wolf slak spin',
+ ]},
+{id:'W2',group:'Woordjes',emoji:'📝',name:'Les 17 – Kleuren',
+ hint:'Kleuren oefenen!',
+ exercises:[
+  'rood blauw groen',
+  'rood blauw groen geel wit',
+  'rood blauw groen geel wit roze',
+  'grijs bruin zwart oranje paars',
+  'rood blauw groen geel wit roze grijs bruin',
+ ]},
+{id:'W3',group:'Woordjes',emoji:'📝',name:'Les 18 – Familie',
+ hint:'Familiewoorden typen!',
+ exercises:[
+  'mama papa oma opa',
+  'mama papa oma opa kind baby',
+  'broer zus tante oom neef nicht',
+  'mama papa oma opa broer zus',
+  'mama papa oma opa broer zus tante oom neef nicht',
+ ]},
+{id:'W4',group:'Woordjes',emoji:'📝',name:'Les 19 – School',
+ hint:'Schoolwoorden!',
+ exercises:[
+  'boek pen klas les',
+  'boek pen klas les schrijven lezen',
+  'school klas juf meester boek pen',
+  'tafel stoel krijtbord raam deur',
+  'school klas boek pen tafel stoel raam deur',
+ ]},
+{id:'W5',group:'Woordjes',emoji:'📝',name:'Les 20 – Natuur',
+ hint:'Woorden uit de natuur!',
+ exercises:[
+  'boom bloem zon maan',
+  'boom bloem zon maan ster regen',
+  'wolk wind sneeuw ijs zee berg',
+  'bos park veld rivier meer',
+  'boom bloem zon maan ster regen wolk wind sneeuw',
+ ]},
+{id:'W6',group:'Woordjes',emoji:'📝',name:'Les 21 – Eten',
+ hint:'Lekker eten typen!',
+ exercises:[
+  'melk brood kaas soep',
+  'melk brood kaas soep vis vlees',
+  'appel peer banaan aardbei',
+  'taart koek snoep cake ijs',
+  'melk brood kaas soep vis appel peer banaan taart',
+ ]},
+{id:'W7',group:'Woordjes',emoji:'📝',name:'Les 22 – Lichaam',
+ hint:'Lichaamsdelen!',
+ exercises:[
+  'hoofd arm been hand',
+  'hoofd arm been hand voet oor',
+  'neus mond oog haar nek knie',
+  'vinger teen elleboog schouder',
+  'hoofd arm been hand voet oor neus mond oog haar',
+ ]},
+{id:'W8',group:'Woordjes',emoji:'📝',name:'Les 23 – Thuis',
+ hint:'Woorden thuis!',
+ exercises:[
+  'huis deur raam kamer',
+  'huis deur raam kamer keuken bad',
+  'stoel tafel bed lamp spiegel',
+  'tuin garage zolder kelder trap',
+  'huis deur raam kamer keuken stoel tafel bed lamp',
+ ]},
+{id:'W9',group:'Woordjes',emoji:'📝',name:'Les 24 – Sport en spel',
+ hint:'Sport en spel!',
+ exercises:[
+  'bal spel sport lopen',
+  'bal spel sport lopen zwemmen fietsen',
+  'voetbal tennis basket hockey',
+  'rennen springen gooien vangen',
+  'bal spel sport lopen zwemmen voetbal tennis rennen',
+ ]},
+{id:'W10',group:'Woordjes',emoji:'📝',name:'Les 25 – Gemengde woordjes',
+ hint:'Allerlei woorden door elkaar!',
+ exercises:[
+  'snurr is een lieve kat',
+  'kat hond boom rood school melk',
+  'mama papa bloem huis bal sport',
+  'boek pen zon maan vis brood arm',
+  'kat hond bloem school melk mama papa zon boek bal',
+ ]},
+
+// ── BLOK 5: KORTE ZINNEN (10 lessen) ──
+{id:'Z1',group:'Zinnen',emoji:'📖',name:'Les 26 – Zinnen over Snurr',
+ hint:'Typ de volledige zin, met spaties!',
+ exercises:[
+  'snurr is een kat',
+  'snurr is een lieve kat',
+  'snurr loopt door de tuin',
+  'snurr zit op de stoel',
+  'snurr is een lieve gele kat',
+ ]},
+{id:'Z2',group:'Zinnen',emoji:'📖',name:'Les 27 – Wie ben ik?',
+ exercises:[
+  'ik ben een kind',
+  'ik ben acht jaar oud',
+  'ik oefen elke dag met typen',
+  'ik leer typen met snurr de kat',
+  'ik ben een echte typeheld',
+ ]},
+{id:'Z3',group:'Zinnen',emoji:'📖',name:'Les 28 – De natuur',
+ exercises:[
+  'de zon schijnt vandaag',
+  'de boom staat in de tuin',
+  'de bloemen zijn rood en geel',
+  'in het bos wonen veel dieren',
+  'de rivier stroomt naar de zee',
+ ]},
+{id:'Z4',group:'Zinnen',emoji:'📖',name:'Les 29 – Op school',
+ exercises:[
+  'ik ga naar school',
+  'de juf leest een boek voor',
+  'we schrijven in ons schrift',
+  'de klas is groot en licht',
+  'na school speel ik buiten met vrienden',
+ ]},
+{id:'Z5',group:'Zinnen',emoji:'📖',name:'Les 30 – Mijn dag',
+ exercises:[
+  'ik sta op en eet brood',
+  'ik ga naar school met de fiets',
+  'na de middag doe ik huiswerk',
+  's avonds eet ik met mijn familie',
+  'voor het slapen lees ik een boek',
+ ]},
+{id:'Z6',group:'Zinnen',emoji:'📖',name:'Les 31 – Dieren',
+ exercises:[
+  'de hond rent door de tuin',
+  'de kat zit op het dak',
+  'de vis zwemt in de vijver',
+  'de vogel zingt in de boom',
+  'het konijn eet graag wortels en sla',
+ ]},
+{id:'Z7',group:'Zinnen',emoji:'📖',name:'Les 32 – Vrienden',
+ exercises:[
+  'mijn vriend heet liam',
+  'we spelen samen voetbal',
+  'mijn vriendin is heel grappig',
+  'we lachen veel als we samen zijn',
+  'goede vrienden helpen elkaar altijd',
+ ]},
+{id:'Z8',group:'Zinnen',emoji:'📖',name:'Les 33 – Eten',
+ exercises:[
+  'ik eet graag pasta met kaas',
+  'mama maakt vanavond soep',
+  'mijn lievelingseten is pizza',
+  'we eten samen aan tafel',
+  'na het sporten drink ik veel water',
+ ]},
+{id:'Z9',group:'Zinnen',emoji:'📖',name:'Les 34 – Dromen',
+ exercises:[
+  'ik wil later astronaut worden',
+  'ik droom van een groot huis met een tuin',
+  'als ik groot ben reis ik de wereld rond',
+  'ik wil leren fietsen zonder handen',
+  'mijn grote droom is een echte typekampioen worden',
+ ]},
+{id:'Z10',group:'Zinnen',emoji:'📖',name:'Les 35 – Gemengde zinnen',
+ exercises:[
+  'snurr helpt mij leren typen',
+  'elke dag oefenen maakt je beter',
+  'typen is een handige vaardigheid',
+  'met twee handen typ je sneller',
+  'ik oefen al vijf lessen en word steeds beter',
+ ]},
+
+// ── BLOK 6: HOOFDLETTERS & LEESTEKENS (5 lessen) ──
+{id:'H1',group:'Hoofdletters',emoji:'🔡',name:'Les 36 – Hoofdletters begin zin',
+ hint:'Elke zin begint met een hoofdletter!',
+ exercises:[
+  'Ik heet Snurr. Ik ben een kat.',
+  'De zon schijnt. Het is warm.',
+  'Mama roept. Ik kom eraan.',
+  'Snurr slaapt. Het is stil.',
+  'Wij leren typen. Dat is leuk!',
+ ]},
+{id:'H2',group:'Hoofdletters',emoji:'🔡',name:'Les 37 – Namen',
+ hint:'Namen schrijf je altijd met een hoofdletter!',
+ exercises:[
+  'Liam en Emma spelen samen.',
+  'Snurr woont bij Thomas.',
+  'Julie en Finn zijn vrienden.',
+  'Meester Pieter leest voor.',
+  'Nora fietst naar school met Sander.',
+ ]},
+{id:'H3',group:'Hoofdletters',emoji:'🔡',name:'Les 38 – Vraag- en uitroeptekens',
+ hint:'Een vraag eindigt met ? — een uitroep eindigt met !',
+ exercises:[
+  'Hoe heet jij?',
+  'Waar woon jij?',
+  'Dat is super!',
+  'Hoera, ik kan typen!',
+  'Wat is jouw lievelingsdier?',
+  'Hoe oud ben jij?',
+  'Snurr is de beste kat!',
+  'Wat eet jij graag?',
+  'Goed gedaan!',
+  'Ik ben een echte typeheld!',
+ ]},
+{id:'H5',group:'Hoofdletters',emoji:'🔡',name:'Les 39 – Punten en kommas',
+ hint:'Zinnen eindigen met een punt. Opsommingen gebruiken kommas.',
+ exercises:[
+  'Ik heb een hond, een kat en een vis.',
+  'We eten soep, brood en kaas.',
+  'Snurr is lief, zacht en grappig.',
+  'De zon schijnt, de vogels zingen.',
+  'Ik oefen met typen, want het is leuk en nuttig.',
+ ]},
+
+{id:'H6',group:'Hoofdletters',emoji:'✍️',name:'Les 40 – Apostrof en accenten',
+ hint:"Op AZERTY: apostrof = Shift+4, é = eigen toets, è = Shift+é, à = eigen toets, ç = eigen toets.",
+ exercises:[
+  "'s avonds eet ik brood",
+  "het is mama's fiets",
+  "Thomas' kat heet Snurr",
+  "mijn T-shirt is blauw",
+  "'s morgens en 's avonds",
+  "Snurr at bij mama's bord",
+  "papa's auto staat buiten",
+  "het kind at 's middags soep",
+  "we gaan naar oma's tuin",
+  "'s avonds lees ik een boek bij mama's lamp",
+ ]},
+
+// ── BLOK 7: LANGE ZINNEN – SNURR VERHAAL (10 lessen) ──
+{id:'V1',group:'Verhaaltje',emoji:'📚',name:'Les 41 – Snurr wordt wakker',
+ hint:'Typ het verhaaltje van Snurr! Rustig en nauwkeurig!',
+ exercises:[
+  'Snurr de kat slaapt op een zachte deken.',
+  'Elke ochtend rekt Snurr zich uit en geeuwt luid.',
+  'Dan springt Snurr van de stoel en loopt naar de keuken.',
+  'In de keuken staat een kom met lekkere melk voor hem klaar.',
+  'Snurr drinkt traag en kijkt daarna uit het raam naar de vogels.',
+ ]},
+{id:'V2',group:'Verhaaltje',emoji:'📚',name:'Les 42 – Snurr in de tuin',
+ exercises:[
+  'Snurr gaat naar buiten en ruikt aan de bloemen.',
+  'De tuin is groot en vol met groene bomen en kleurrijke bloemen.',
+  'Een vlinder vliegt voorbij en Snurr springt erachteraan.',
+  'Maar de vlinder is veel te snel en vliegt weg over de heg.',
+  'Snurr kijkt hem na en gaat dan lekker in de zon liggen.',
+ ]},
+{id:'V3',group:'Verhaaltje',emoji:'📚',name:'Les 43 – Snurr en de muis',
+ exercises:[
+  'Op een dag ziet Snurr een muis in de keuken zitten.',
+  'De muis eet stiekem van de kaas op het aanrecht.',
+  'Snurr sluipt heel zacht en langzaam naderbij.',
+  'Maar de muis hoort hem en rent razendsnel weg.',
+  'Snurr schudt zijn hoofd en gaat weer slapen op zijn deken.',
+ ]},
+{id:'V4',group:'Verhaaltje',emoji:'📚',name:'Les 44 – Snurr leert typen',
+ exercises:[
+  'Op een regenachtige dag besluit Snurr te leren typen.',
+  'Hij zet zijn pootjes op de thuistoetsen Q S D F en J K L M.',
+  'Eerst typt hij langzaam: een letter per poot.',
+  'Dan gaat het sneller en sneller, want Snurr oefent elke dag.',
+  'Na een week is Snurr de snelste typer van de hele buurt!',
+ ]},
+{id:'V5',group:'Verhaaltje',emoji:'📚',name:'Les 45 – Snurr op avontuur',
+ exercises:[
+  'Snurr pakt zijn rugzak en gaat op avontuur in het bos.',
+  'Het bos is donker en vol met hoge bomen en rare geluiden.',
+  'Snurr hoort een takje kraken en blijft doodstil staan.',
+  'Dan springt er een haas uit de struiken en Snurr schrikt zich wild.',
+  'Lachend loopt Snurr verder het bos in, op zoek naar nieuwe avonturen.',
+ ]},
+{id:'V6',group:'Verhaaltje',emoji:'📚',name:'Les 46 – Snurr en zijn vrienden',
+ exercises:[
+  'Snurr heeft veel vrienden in de straat waar hij woont.',
+  'Er is Fien de hond, die altijd blij kwispelt als ze Snurr ziet.',
+  'En er is Max de papegaai, die altijd de woorden van Snurr herhaalt.',
+  'Samen spelen ze in de tuin en verzinnen ze grappige spelletjes.',
+  'Snurr is de gelukkigste kat ter wereld omdat hij zulke fijne vrienden heeft.',
+ ]},
+{id:'V7',group:'Verhaaltje',emoji:'📚',name:'Les 47 – Snurr gaat naar school',
+ exercises:[
+  'Op een dag mag Snurr mee naar de klas van zijn baasje Thomas.',
+  'De kinderen zijn heel blij om Snurr te zien en willen hem allemaal aaien.',
+  'Snurr gaat vooraan zitten en kijkt aandachtig naar het bord.',
+  'Als de juf vraagt wie het antwoord weet, steekt Snurr zijn pootje op.',
+  'De hele klas lacht en Snurr wordt uitgeroepen tot de slimste kat van de klas.',
+ ]},
+{id:'V8',group:'Verhaaltje',emoji:'📚',name:'Les 48 – Snurr in de winter',
+ exercises:[
+  'In de winter is het koud buiten en Snurr blijft liever binnen.',
+  'Hij kruipt onder een warme deken en drinkt een kom warme melk.',
+  'Door het raam kijkt hij naar de sneeuwvlokken die langzaam vallen.',
+  'Thomas komt binnen met een rode sjaal en doet die om Snurrs nek.',
+  'Nu is Snurr de warmste en stijlvolste kat van het hele dorp.',
+ ]},
+{id:'V9',group:'Verhaaltje',emoji:'📚',name:'Les 49 – Snurr wordt ziek',
+ exercises:[
+  'Op een dag voelt Snurr zich niet goed en blijft op zijn kussen liggen.',
+  'Thomas brengt hem water en een zachte koek als troost.',
+  'De dierenarts komt langs en zegt dat Snurr gewoon rust nodig heeft.',
+  'Na drie dagen is Snurr weer helemaal beter en rent hij door de tuin.',
+  'Snurr heeft geleerd dat rusten soms net zo belangrijk is als oefenen.',
+ ]},
+{id:'V10',group:'Verhaaltje',emoji:'📚',name:'Les 50 – Snurr is een TypeHeld!',
+ exercises:[
+  'Na weken van oefenen is Snurr een echte TypeHeld geworden.',
+  'Hij typt met al zijn tien poten op het toetsenbord en maakt geen fouten meer.',
+  'Thomas is heel trots op zijn lieve kat die zo hard heeft geoefend.',
+  'Snurr kijkt in de spiegel en ziet een zelfzekere, sterke typekampioen.',
+  'En jij? Als jij elke dag oefent, word jij ook een echte TypeHeld, net als Snurr!',
+ ]},
+];
+
+// ═══════════════════════════════════════════════
+// BADGES
+// ═══════════════════════════════════════════════
+const BADGES = [
+  {id:'first-letter',icon:'🎉',name:'Eerste letter!'},
+  {id:'first-lesson',icon:'✅',name:'Eerste les'},
+  {id:'three-stars',icon:'⭐',name:'3 sterren'},
+  {id:'ten-lessons',icon:'🏆',name:'10 lessen'},
+  {id:'first-word',icon:'📝',name:'Eerste woord'},
+  {id:'speed',icon:'⚡',name:'Snelle vingers'},
+  {id:'perfect',icon:'💎',name:'Perfectie'},
+  {id:'fifteen-min',icon:'⏱',name:'15 minuten!'},
+  {id:'halfway',icon:'🚀',name:'Halverwege!'},
+  {id:'all-lessons',icon:'👑',name:'Alle lessen!'},
+];
+
+// ═══════════════════════════════════════════════
+// STATE + LOCALSTORAGE
+// ═══════════════════════════════════════════════
+const LS_KEY = 'typeheld_v2';
+
+function defaultState(){
+  return {
+    // All lessons open from the start
+    lessons: LESSONS.map(l=>({id:l.id, completed:false, stars:0, exerciseDone:0, bestAcc:0})),
+    badges:{}, totalStars:0, totalLessons:0,
+  };
+}
+
+function saveProgress(){
+  try {
+    const saved = {
+      lessons: state.lessons.map(l=>({id:l.id,completed:l.completed,stars:l.stars,exerciseDone:l.exerciseDone,bestAcc:l.bestAcc||0})),
+      badges: state.badges,
+      totalStars: state.totalStars,
+      totalLessons: state.totalLessons,
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(saved));
+  } catch(e){}
+}
+
+function loadProgress(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  } catch(e){ return null; }
+}
+
+function buildState(){
+  const saved = loadProgress();
+  const lessonBase = LESSONS.map(l=>({...l, unlocked:true, completed:false, stars:0, exerciseDone:0, bestAcc:0}));
+  if(saved){
+    saved.lessons.forEach(sl=>{
+      const lv = lessonBase.find(l=>l.id===sl.id);
+      if(lv){ lv.completed=sl.completed; lv.stars=sl.stars; lv.exerciseDone=sl.exerciseDone; lv.bestAcc=sl.bestAcc||0; }
+    });
+  }
+  return {
+    lessons: lessonBase,
+    badges: saved?.badges||{},
+    totalStars: saved?.totalStars||0,
+    totalLessons: saved?.totalLessons||0,
+    sessionStart:null, sessionInterval:null,
+    currentLesson:null, currentExIndex:0,
+    currentText:'', typedSoFar:'',
+    correctChars:0, wrongChars:0, exerciseStart:null, active:false,
+    // Entry test state
+    entryLesson:null, entryQuestions:[], entryQIdx:0,
+    entryCorrect:0, entryWrong:0, entryExStart:null,
+    entryTyped:'', entryText:'',
+  };
+}
+
+let state = buildState();
+
+// ── ENTRY TEST DATA ──
+// For each lesson, which earlier lesson's exercises to use as warm-up check.
+// key = lesson id, value = {sourceId, exercises[3]}
+function getEntryQuestions(lessonIdx){
+  // Les 1 & 2: no prerequisite, short self-check from same group
+  const lv = state.lessons[lessonIdx];
+  const id = lv.id;
+  // Map lesson to prerequisite exercises (3 short ones)
+  const prereqMap = {
+    // Thuisrij
+    'T1': null, // no prereq
+    'T2': null,
+    'T3': {label:'Thuisrij links + rechts', exercises:['qsdf','jklm','fdsq mlkj']},
+    'T4': {label:'Thuisrij beide handen', exercises:['qj sk dl fm','fjdk slqm','qsdf jklm']},
+    // Bovenrij
+    'B1': {label:'Thuisrij drill', exercises:['qsdf jklm','ffjj ddkk','qjskdlfm']},
+    'B2': {label:'Thuisrij + wijsvingers', exercises:['fr fr fr ft ft','ju ju ju jy jy','frf ftf juj']},
+    'B3': {label:'Thuisrij + middelvingers', exercises:['de de de ki ki','ded kik deke','edki iekd']},
+    'B4': {label:'Thuisrij + ring- en middelvingers', exercises:['sz lo szlo','de ki ded kik','szlo olsz']},
+    'B5': {label:'Bovenrij per vinger', exercises:['qa mp qaqa','azerty yuiop','rftj yuft']},
+    // Onderrij
+    'O1': {label:'Alle bovenrijvingers', exercises:['azerty yuiop','azer tyui','tryu ioer']},
+    'O2': {label:'Thuisrij + wijsvingers omlaag', exercises:['fv fv fb fb','jn jn fvf fbf','fvbj njfv']},
+    'O3': {label:'Thuisrij + midden omlaag', exercises:['dc dc kdc','dcd cdc dck','dcdk kdcd']},
+    'O4': {label:'Thuisrij + ring omlaag', exercises:['sx sx lx ls','sxs xsx lxl','sxlx xlsz']},
+    'O5': {label:'Pink omlaag', exercises:['qw qw wq wq','qwq wqw','qwqwwqqw']},
+    'O6': {label:'Alle onderrijvingers', exercises:['wxcvbn nvcxw','wvcx bncv','wxcv cvbn']},
+    // Woordjes
+    'W1': {label:'Alle rijen samen', exercises:['azerty wxcvbn','qsdfghjklm','azertyuiop']},
+    'W2': {label:'Eerste woordjes', exercises:['kat hond vis','muis beer wolf','slak spin krab']},
+    'W3': {label:'Kleuren + dieren', exercises:['rood blauw groen','appel peer boom','kat hond vis muis']},
+    'W4': {label:'Familie + kleuren', exercises:['mama papa oma opa','rood blauw groen','broer zus kind']},
+    'W5': {label:'School + familie', exercises:['boek pen klas les','mama papa broer','school juf meester']},
+    'W6': {label:'Natuur + school', exercises:['boom bloem zon maan','boek pen klas','wolk wind sneeuw']},
+    'W7': {label:'Eten + natuur', exercises:['melk brood kaas','appel peer banaan','boom bloem zon']},
+    'W8': {label:'Lichaam + eten', exercises:['hoofd arm been hand','melk brood kaas','appel peer vis']},
+    'W9': {label:'Thuis + lichaam', exercises:['huis deur raam kamer','hoofd arm been','stoel tafel bed']},
+    'W10': {label:'Sport + thuis', exercises:['bal spel sport lopen','huis deur raam','rennen springen']},
+    // Zinnen
+    'Z1': {label:'Gemengde woordjes', exercises:['kat hond boom rood','mama papa bloem huis','boek pen zon maan']},
+    'Z2': {label:'Zinnen over Snurr', exercises:['snurr is een kat','snurr loopt door de tuin','snurr zit op de stoel']},
+    'Z3': {label:'Wie ben ik', exercises:['ik ben een kind','ik ben acht jaar oud','ik oefen elke dag']},
+    'Z4': {label:'Natuur zinnen', exercises:['de zon schijnt vandaag','de boom staat in de tuin','de bloemen zijn rood']},
+    'Z5': {label:'School zinnen', exercises:['ik ga naar school','de juf leest een boek','we schrijven in ons schrift']},
+    'Z6': {label:'Mijn dag zinnen', exercises:['ik sta op en eet brood','ik ga naar school','na de middag doe ik huiswerk']},
+    'Z7': {label:'Dieren zinnen', exercises:['de hond rent door de tuin','de kat zit op het dak','de vis zwemt in de vijver']},
+    'Z8': {label:'Vrienden zinnen', exercises:['mijn vriend heet liam','we spelen samen voetbal','we lachen veel samen']},
+    'Z9': {label:'Eten zinnen', exercises:['ik eet graag pasta met kaas','mama maakt vanavond soep','we eten samen aan tafel']},
+    'Z10': {label:'Dromen zinnen', exercises:['ik wil later astronaut worden','ik droom van een groot huis','elke dag oefenen maakt beter']},
+    // Hoofdletters
+    'H1': {label:'Gemengde zinnen', exercises:['snurr helpt mij leren typen','elke dag oefenen maakt je beter','ik oefen al vijf lessen']},
+    'H2': {label:'Begin zin hoofdletter', exercises:['Ik heet Snurr. Ik ben een kat.','De zon schijnt. Het is warm.','Snurr slaapt. Het is stil.']},
+    'H3': {label:'Namen', exercises:['Liam en Emma spelen samen.','Snurr woont bij Thomas.','Meester Pieter leest voor.']},
+    'H5': {label:'Vraag- en uitroeptekens', exercises:['Hoe heet jij?','Dat is super!','Snurr is de beste kat!']},
+    'H6': {label:'Punten en kommas', exercises:['Ik heb een hond, een kat en een vis.','Snurr is lief, zacht en grappig.','Ik oefen met typen, want het is leuk.']},
+    // Verhaaltjes
+    'V1': {label:'Apostrof en accenten', exercises:["'s avonds eet ik brood","het is mama's fiets","papa's auto staat buiten"]},
+    'V2': {label:'Snurr wordt wakker', exercises:['Snurr de kat slaapt op een zachte deken.','Dan springt Snurr van de stoel.','Snurr drinkt traag en kijkt uit het raam.']},
+    'V3': {label:'Snurr in de tuin', exercises:['Snurr gaat naar buiten en ruikt aan de bloemen.','Een vlinder vliegt voorbij.','Snurr kijkt hem na en gaat in de zon liggen.']},
+    'V4': {label:'Snurr en de muis', exercises:['Op een dag ziet Snurr een muis.','De muis eet stiekem van de kaas.','Snurr schudt zijn hoofd en gaat slapen.']},
+    'V5': {label:'Snurr leert typen', exercises:['Op een regenachtige dag leert Snurr typen.','Hij zet zijn pootjes op de thuistoetsen.','Na een week is Snurr de snelste typer.']},
+    'V6': {label:'Snurr op avontuur', exercises:['Snurr pakt zijn rugzak voor het bos.','Het bos is donker en vol met hoge bomen.','Lachend loopt Snurr verder het bos in.']},
+    'V7': {label:'Snurr en zijn vrienden', exercises:['Snurr heeft veel vrienden in de straat.','Er is Fien de hond die altijd blij is.','Samen spelen ze grappige spelletjes.']},
+    'V8': {label:'Snurr gaat naar school', exercises:['Op een dag mag Snurr mee naar de klas.','De kinderen willen Snurr allemaal aaien.','Snurr wordt de slimste kat van de klas.']},
+    'V9': {label:'Snurr in de winter', exercises:['In de winter blijft Snurr liever binnen.','Hij kruipt onder een warme deken.','Nu is Snurr de warmste kat van het dorp.']},
+    'V10': {label:'Snurr wordt ziek', exercises:['Op een dag voelt Snurr zich niet goed.','Thomas brengt hem water als troost.','Na drie dagen is Snurr weer beter.']},
+  };
+  return prereqMap[id] || null;
+}
+
+// ═══════════════════════════════════════════════
+// SESSION TIMER + TYPING TIME TRACKER
+// ═══════════════════════════════════════════════
+const SESSION_SECS = 900;
+const TYPING_ALERT_SECS = 600; // 10 min effectief typen
+let sessionSecsLeft = SESSION_SECS;
+let totalTypingSecs = 0;       // effectieve typtijd in seconden
+let typingAlertShown = false;
+let typingTickInterval = null;
+
+function startSessionTimer(){
+  if(state.sessionInterval) return;
+  state.sessionStart = Date.now();
+  state.sessionInterval = setInterval(()=>{
+    sessionSecsLeft = Math.max(0, SESSION_SECS - Math.floor((Date.now()-state.sessionStart)/1000));
+    const m=Math.floor(sessionSecsLeft/60), s=sessionSecsLeft%60;
+    document.getElementById('sessionTimerDisplay').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+    document.getElementById('sessionBar').style.width = ((SESSION_SECS-sessionSecsLeft)/SESSION_SECS*100)+'%';
+    if(sessionSecsLeft===0){
+      clearInterval(state.sessionInterval);
+      awardBadge('fifteen-min');
+      catSay('🎉 Wauw! 15 minuten geoefend! Morgen verder, TypeHeld!');
+    }
+  },1000);
+}
+
+// Start typtimer wanneer oefening actief is
+function startTypingTick(){
+  if(typingTickInterval) return;
+  typingTickInterval = setInterval(()=>{
+    if(!state.active) return;
+    totalTypingSecs++;
+    if(!typingAlertShown && totalTypingSecs >= TYPING_ALERT_SECS){
+      typingAlertShown = true;
+      // Wacht tot na huidige oefening om te melden
+      state._showTypingAlertAfterExercise = true;
+    }
+  }, 1000);
+}
+
+function closeTypingTime(){
+  document.getElementById('typingTimeOverlay').style.display='none';
+}
+
+// ═══════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════
+function buildKeyboard(){
+  const kb = document.getElementById('keyboard');
+  kb.innerHTML='';
+  KB_LAYOUT.forEach(({keys,indent})=>{
+    const row=document.createElement('div');
+    row.className='kb-row';
+    row.style.marginLeft=indent+'px';
+    keys.forEach(({k,hand,home})=>{
+      const el=document.createElement('div');
+      el.className='kb-key';
+      el.id='key-'+k;
+      el.textContent=k;
+      if(hand==='l') el.classList.add('lh');
+      if(hand==='r') el.classList.add('rh');
+      if(home) el.classList.add('home');
+      row.appendChild(el);
+    });
+    kb.appendChild(row);
+  });
+  // Space row
+  const spRow=document.createElement('div');
+  spRow.className='kb-row';
+  const sp=document.createElement('div');
+  sp.className='kb-key space-key';
+  sp.id='key-SPACE';
+  sp.textContent='SPATIE';
+  spRow.appendChild(sp);
+  kb.appendChild(spRow);
+}
+
+function highlightKey(char){
+  document.querySelectorAll('.kb-key').forEach(k=>k.classList.remove('active-key'));
+  if(!char) return;
+  const id = char===' ' ? 'key-SPACE' : 'key-'+char.toUpperCase();
+  const el=document.getElementById(id);
+  if(el) el.classList.add('active-key');
+  animateFinger(char);
+}
+
+// ═══════════════════════════════════════════════
+// FINGER ANIMATION
+// ═══════════════════════════════════════════════
+function animateFinger(char){
+  // Reset all fingers
+  document.querySelectorAll('.finger').forEach(f=>{
+    f.style.fill='';
+    f.classList.remove('active');
+  });
+  const fid = FINGER_MAP[char.toLowerCase()];
+  if(!fid) return;
+  const el=document.getElementById(fid);
+  if(el){
+    el.classList.add('active');
+    // Show which key to press in hint
+    const hintTexts={
+      'lf-pinky':'Pink (linker): Q / A / W',
+      'lf-ring':'Ringvinger (linker): S / Z / X',
+      'lf-middle':'Middelvinger (linker): D / E / C',
+      'lf-index':'Wijsvinger (linker): F / R / V / T / G / B',
+      'lf-thumb':'Duim (linker): SPATIE',
+      'rf-index':'Wijsvinger (rechter): J / U / N / H / Y',
+      'rf-middle':'Middelvinger (rechter): K / I',
+      'rf-ring':'Ringvinger (rechter): L / O',
+      'rf-pinky':'Pink (rechter): M / P',
+    };
+    const hint=document.getElementById('handHint');
+    if(hint) hint.textContent = hintTexts[fid]||'';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// LEVELS LIST
+// ═══════════════════════════════════════════════
+function renderLevels(){
+  const grid=document.getElementById('levelsGrid');
+  grid.innerHTML='';
+  let currentGroup='';
+  state.lessons.forEach((lv,idx)=>{
+    if(lv.group!==currentGroup){
+      currentGroup=lv.group;
+      const grp=document.createElement('div');
+      grp.className='section-group';
+      grp.textContent=lv.group;
+      grid.appendChild(grp);
+    }
+    const btn=document.createElement('button');
+    btn.className='level-btn';
+    const isCurrent=state.currentLesson&&state.currentLesson.id===lv.id;
+    if(isCurrent) btn.classList.add('current-level');
+    else if(lv.completed) btn.classList.add('completed');
+    else btn.classList.add('unlocked');
+    const starsStr=lv.stars?'⭐'.repeat(lv.stars):'';
+    const accStr=lv.bestAcc>0?`${lv.bestAcc}%`:'';
+    btn.innerHTML=`<span class="level-num">${idx+1}.</span><span class="level-emoji">${lv.emoji}</span><span class="level-name">${lv.name.split('–')[1]?.trim()||lv.name}</span><span class="level-stars">${starsStr}${accStr?` <small style="font-size:0.65rem;opacity:0.7">${accStr}</small>`:''}</span>`;
+    btn.onclick=()=>startLesson(idx);
+    grid.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// BADGES
+// ═══════════════════════════════════════════════
+function renderBadges(){
+  const row=document.getElementById('badgesRow');
+  row.innerHTML='';
+  BADGES.forEach(b=>{
+    const div=document.createElement('div');
+    div.className='badge-item';
+    const earned=!!state.badges[b.id];
+    div.innerHTML=`<div class="badge-icon ${earned?'earned':''}" title="${b.name}">${b.icon}</div><span>${b.name}</span>`;
+    row.appendChild(div);
+  });
+}
+
+function awardBadge(id){
+  if(state.badges[id]) return;
+  state.badges[id]=true;
+  document.getElementById('totalBadges').textContent=Object.keys(state.badges).length;
+  renderBadges();
+  const b=BADGES.find(x=>x.id===id);
+  if(b) catSay(`🏅 Nieuwe badge: "${b.name}"! Super!`);
+}
+
+// ═══════════════════════════════════════════════
+// LESSON / EXERCISE
+// ═══════════════════════════════════════════════
+function startLesson(idx){
+  const lv = state.lessons[idx];
+  state.pendingLessonIdx = idx;
+  startSessionTimer();
+
+  const prereq = getEntryQuestions(idx);
+  if(!prereq){
+    // Les 1 & 2: geen instaptoets, gewoon starten
+    proceedToLesson();
+    return;
+  }
+  // Start entry test
+  state.entryLesson = lv;
+  state.entryQuestions = prereq.exercises;
+  state.entryQIdx = 0;
+  state.entryCorrect = 0;
+  state.entryWrong = 0;
+
+  document.getElementById('entryTestResult').style.display='none';
+  document.getElementById('entryTestExArea').style.display='';
+  document.getElementById('entryTestCat').textContent='🐱';
+  document.getElementById('entryTestTitle').textContent=`${lv.emoji} ${lv.name}`;
+  document.getElementById('entryTestMsg').textContent=`Herhaling: ${prereq.label} — typ 3 oefeningen!`;
+  document.getElementById('entryTestOverlay').style.display='flex';
+
+  runEntryQuestion();
+}
+
+function runEntryQuestion(){
+  const ex = state.entryQuestions[state.entryQIdx];
+  state.entryText = ex;
+  state.entryTyped = '';
+  state.entryExStart = Date.now();
+  document.getElementById('entryQ').textContent = state.entryQIdx+1;
+  renderEntryDisplay();
+  updateEntryStats();
+  document.getElementById('entryInput').value='';
+  document.getElementById('entryInput').focus();
+}
+
+function renderEntryDisplay(){
+  const display = document.getElementById('entryTestDisplay');
+  const text = state.entryText, typed = state.entryTyped;
+  display.innerHTML='';
+  // Adjust font size for longer texts
+  if(text.length > 30){
+    display.style.fontSize = text.length > 50 ? '1.1rem' : '1.25rem';
+    display.style.letterSpacing = '0.04em';
+  } else {
+    display.style.fontSize = '1.6rem';
+    display.style.letterSpacing = '';
+  }
+  // Group by word so line breaks only happen between words
+  let i=0;
+  while(i < text.length){
+    if(text[i]===' '){
+      display.appendChild(makeCharSpan(' ', i, typed));
+      i++;
+    } else {
+      const group=document.createElement('span');
+      group.className='word-group';
+      while(i < text.length && text[i]!==' '){
+        group.appendChild(makeCharSpan(text[i], i, typed));
+        i++;
+      }
+      display.appendChild(group);
+    }
+  }
+}
+
+function updateEntryStats(){
+  const total=state.entryCorrect+state.entryWrong;
+  const acc=total>0?Math.round(state.entryCorrect/total*100):0;
+  document.getElementById('entryCorrect').textContent=state.entryCorrect;
+  document.getElementById('entryWrong').textContent=state.entryWrong;
+  document.getElementById('entryAcc').textContent=total>0?acc+'%':'-';
+}
+
+function finishEntryTest(){
+  const total=state.entryCorrect+state.entryWrong;
+  const acc=total>0?Math.round(state.entryCorrect/total*100):0;
+  document.getElementById('entryTestExArea').style.display='none';
+  document.getElementById('entryTestResult').style.display='';
+
+  const goBtn=document.getElementById('entryGoBtn');
+  const repBtn=document.getElementById('entryRepeatBtn');
+
+  if(acc>=85){
+    // Groen licht
+    document.getElementById('entryTestCat').textContent='😻';
+    document.getElementById('entryStars').textContent='✅✅✅';
+    document.getElementById('entryResultMsg').textContent=`Super! ${acc}% nauwkeurigheid — je bent klaar voor deze les!`;
+    goBtn.textContent='Start les! 🚀';
+    goBtn.style.display='';
+    repBtn.style.display='none';
+  } else if(acc>=60){
+    // Waarschuwing maar mag door
+    document.getElementById('entryTestCat').textContent='😺';
+    document.getElementById('entryStars').textContent='⚠️';
+    document.getElementById('entryResultMsg').textContent=`${acc}% nauwkeurigheid — je mag doorgaan, maar extra oefening loont!`;
+    goBtn.textContent='Toch doorgaan ➡️';
+    goBtn.style.display='';
+    repBtn.style.display='none';
+  } else {
+    // Blokkering — eerst herhalen
+    const recIdx = Math.max(0, state.pendingLessonIdx-1);
+    const recLv = state.lessons[recIdx];
+    state.recommendedIdx = recIdx;
+    document.getElementById('entryTestCat').textContent='😿';
+    document.getElementById('entryStars').textContent='❌';
+    document.getElementById('entryResultMsg').textContent=`${acc}% nauwkeurigheid — oefen eerst "${recLv.name}" nog eens goed in voor je verder gaat!`;
+    goBtn.style.display='none';
+    repBtn.textContent=`↩️ Ga naar: ${recLv.name}`;
+    repBtn.style.display='';
+  }
+}
+
+function proceedToLesson(){
+  document.getElementById('entryTestOverlay').style.display='none';
+  const idx = state.pendingLessonIdx;
+  const lv = state.lessons[idx];
+  state.currentLesson = lv;
+  state.currentExIndex = lv.exerciseDone % lv.exercises.length;
+  startExercise();
+  renderLevels();
+}
+
+function goToRecommended(){
+  document.getElementById('entryTestOverlay').style.display='none';
+  startLesson(state.recommendedIdx);
+}
+
+function closeEntryTest(){
+  document.getElementById('entryTestOverlay').style.display='none';
+}
+
+function startExercise(){
+  const lv=state.currentLesson;
+  if(!lv) return;
+  const ex=lv.exercises[state.currentExIndex % lv.exercises.length];
+  state.currentText=ex;
+  state.typedSoFar='';
+  state.correctChars=0;
+  state.wrongChars=0;
+  state.exerciseStart=Date.now();
+  state.active=true;
+  document.getElementById('lessonTitle').textContent=`${lv.emoji} ${lv.name}`;
+  document.getElementById('lessonLabel').textContent=lv.name;
+  document.getElementById('progressText').textContent=
+    `Oefening ${(state.currentExIndex%lv.exercises.length)+1} / ${lv.exercises.length}`;
+  document.getElementById('progressBar').style.width=
+    ((state.currentExIndex%lv.exercises.length)/lv.exercises.length*100)+'%';
+  document.getElementById('handAnimTitle').textContent='🖐️ '+lv.hint;
+  renderExercise();
+  if(ex[0]) highlightKey(ex[0]);
+  catSay(lv.hint||'Typ de oefening zo goed mogelijk!');
+  document.getElementById('hiddenInput').value='';
+  document.getElementById('hiddenInput').focus();
+  startTypingTick();
+}
+
+function makeCharSpan(ch, i, typed){
+  const span=document.createElement('span');
+  if(i<typed.length){
+    span.className=typed[i]===ch?'char-correct':'char-wrong';
+    span.textContent=ch===' '?'·':ch;
+  } else if(i===typed.length){
+    span.className='char-current';
+    span.textContent=ch===' '?'·':ch;
+  } else {
+    span.className='char-upcoming';
+    span.textContent=ch===' '?'·':ch;
+  }
+  return span;
+}
+
+function renderExercise(){
+  const display=document.getElementById('exerciseDisplay');
+  const text=state.currentText, typed=state.typedSoFar;
+  display.innerHTML='';
+
+  // Use smaller font for longer texts to prevent overflow
+  if(text.length > 30){
+    display.classList.remove('short');
+    display.style.fontSize = text.length > 50 ? '1.15rem' : '1.35rem';
+    display.style.letterSpacing = '0.04em';
+  } else {
+    display.classList.add('short');
+    display.style.fontSize = '';
+    display.style.letterSpacing = '';
+  }
+
+  // Group by word so line breaks only happen between words
+  let i=0;
+  while(i < text.length){
+    if(text[i]===' '){
+      // Space as its own span
+      display.appendChild(makeCharSpan(' ', i, typed));
+      i++;
+    } else {
+      // Collect a full word into a no-break group
+      const group=document.createElement('span');
+      group.className='word-group';
+      while(i < text.length && text[i]!==' '){
+        group.appendChild(makeCharSpan(text[i], i, typed));
+        i++;
+      }
+      display.appendChild(group);
+    }
+  }
+  updateStats();
+}
+
+function updateStats(){
+  const total=state.correctChars+state.wrongChars;
+  const acc=total>0?Math.round(state.correctChars/total*100):0;
+  const elapsed=(Date.now()-(state.exerciseStart||Date.now()))/60000;
+  const wpm=elapsed>0?Math.round((state.correctChars/5)/elapsed):0;
+  document.getElementById('statCorrect').textContent=state.correctChars;
+  document.getElementById('statWrong').textContent=state.wrongChars;
+  document.getElementById('statAccuracy').textContent=total>0?acc+'%':'-';
+  document.getElementById('statWpm').textContent=total>0?wpm:'-';
+}
+
+// ═══════════════════════════════════════════════
+// INPUT
+// ═══════════════════════════════════════════════
+document.getElementById('hiddenInput').addEventListener('input',function(){
+  if(!state.active||!state.currentLesson) return;
+  const val=this.value;
+  const last=val[val.length-1];
+  if(!last) return;
+  this.value='';
+  const expected=state.currentText[state.typedSoFar.length];
+  if(last===expected){
+    state.typedSoFar+=last;
+    state.correctChars++;
+    if(!state.badges['first-letter']) awardBadge('first-letter');
+  } else {
+    state.wrongChars++;
+    shakeIt();
+  }
+  renderExercise();
+  const ni=state.typedSoFar.length;
+  if(ni<state.currentText.length) highlightKey(state.currentText[ni]);
+  else finishExercise();
+});
+
+document.getElementById('hiddenInput').addEventListener('keydown',function(e){
+  if(e.key==='Backspace'){
+    if(state.typedSoFar.length>0){
+      state.typedSoFar=state.typedSoFar.slice(0,-1);
+      renderExercise();
+      highlightKey(state.currentText[state.typedSoFar.length]);
+    }
+    this.value=''; e.preventDefault();
+  }
+});
+
+function shakeIt(){
+  const d=document.getElementById('exerciseDisplay');
+  d.style.animation='none'; d.offsetHeight; d.style.animation='shake 0.3s';
+  setTimeout(()=>d.style.animation='',300);
+}
+
+// Entry test input
+document.getElementById('entryInput').addEventListener('input',function(){
+  const val=this.value;
+  const last=val[val.length-1];
+  if(!last) return;
+  this.value='';
+  const expected=state.entryText[state.entryTyped.length];
+  if(last===expected){
+    state.entryTyped+=last;
+    state.entryCorrect++;
+  } else {
+    state.entryWrong++;
+  }
+  renderEntryDisplay();
+  updateEntryStats();
+  if(state.entryTyped===state.entryText){
+    state.entryQIdx++;
+    if(state.entryQIdx<state.entryQuestions.length){
+      setTimeout(()=>runEntryQuestion(),400);
+    } else {
+      setTimeout(()=>finishEntryTest(),400);
+    }
+  }
+});
+
+document.getElementById('entryInput').addEventListener('keydown',function(e){
+  if(e.key==='Backspace'){
+    if(state.entryTyped.length>0){
+      state.entryTyped=state.entryTyped.slice(0,-1);
+      renderEntryDisplay();
+    }
+    this.value=''; e.preventDefault();
+  }
+});
+
+// ═══════════════════════════════════════════════
+// FINISH
+// ═══════════════════════════════════════════════
+function finishExercise(){
+  state.active=false;
+  document.querySelectorAll('.kb-key').forEach(k=>k.classList.remove('active-key'));
+  document.querySelectorAll('.finger').forEach(f=>f.classList.remove('active'));
+  const lv=state.currentLesson;
+  const total=state.correctChars+state.wrongChars;
+  const acc=total>0?Math.round(state.correctChars/total*100):100;
+  const elapsed=(Date.now()-state.exerciseStart)/60000;
+  const wpm=elapsed>0?Math.round((state.correctChars/5)/elapsed):0;
+  let stars=1;
+  if(acc>=80) stars=2;
+  if(acc>=95) stars=3;
+  lv.stars=Math.max(lv.stars,stars);
+  lv.bestAcc=Math.max(lv.bestAcc||0,acc);
+  lv.exerciseDone++;
+  state.totalLessons++;
+  state.totalStars+=stars;
+  document.getElementById('totalStars').textContent=state.totalStars;
+  const lessonJustCompleted = (lv.exerciseDone >= lv.exercises.length) && !lv.completed;
+  if(lv.exerciseDone>=lv.exercises.length) lv.completed=true;
+  saveProgress();
+  // Badges
+  awardBadge('first-lesson');
+  if(stars===3) awardBadge('three-stars');
+  if(state.totalLessons>=10) awardBadge('ten-lessons');
+  if(['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10'].includes(lv.id)) awardBadge('first-word');
+  if(wpm>=20) awardBadge('speed');
+  if(acc===100) awardBadge('perfect');
+  if(state.totalLessons>=25) awardBadge('halfway');
+  if(state.lessons.every(l=>l.completed)) awardBadge('all-lessons');
+  renderLevels();
+
+  // Toon eerst 10-min melding als die nog niet getoond is
+  if(state._showTypingAlertAfterExercise){
+    state._showTypingAlertAfterExercise = false;
+    document.getElementById('typingTimeOverlay').style.display='flex';
+    catSay('Je hebt al 10 minuten getypt! Goed gedaan! 🌟');
+    return; // geen resultaatscherm, herstart na sluiten overlay
+  }
+
+  // Les volledig afgerond → speciale overlay
+  if(lessonJustCompleted){
+    const starsStr='⭐'.repeat(lv.stars)+'☆'.repeat(3-lv.stars);
+    const nextIdx = state.lessons.findIndex(l=>l.id===lv.id)+1;
+    const hasNext = nextIdx < state.lessons.length;
+    document.getElementById('lcTitle').textContent=`🎊 Les voltooid!`;
+    document.getElementById('lcMsg').textContent=`Je hebt alle oefeningen van "${lv.name}" gedaan! Beste score:`;
+    document.getElementById('lcStars').textContent=starsStr;
+    document.getElementById('lcStat').textContent=`Nauwkeurigheid: ${lv.bestAcc}%`;
+    document.getElementById('lcNextBtn').style.display=hasNext?'':'none';
+    if(hasNext) state._nextLessonIdx=nextIdx;
+    document.getElementById('lessonCompleteOverlay').style.display='flex';
+    spawnConfetti();
+    catSay(`Proficiat! Je hebt les ${lv.name.split('–')[0].replace('Les','').trim()} volledig afgerond! 🎉`);
+    return;
+  }
+
+  // Gewoon resultaatscherm
+  const starsStr='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+  document.getElementById('resultCat').textContent=stars===3?'😻':stars===2?'😸':'😺';
+  document.getElementById('resultTitle').textContent=stars===3?'Perfecte score! 🎉':stars===2?'Heel goed! 👏':'Goed geprobeerd! 💪';
+  document.getElementById('resultMsg').textContent=`"${state.currentText.substring(0,30)}${state.currentText.length>30?'...':''}"`;
+  document.getElementById('resultStars').textContent=starsStr;
+  document.getElementById('resultStat').textContent=`Nauwkeurigheid: ${acc}% | Snelheid: ${wpm} WPM`;
+  document.getElementById('resultOverlay').style.display='flex';
+  if(stars>=2) spawnConfetti();
+}
+
+function continueLesson(){
+  document.getElementById('lessonCompleteOverlay').style.display='none';
+  // Herstart les van begin, zonder instaptoets
+  state.currentExIndex=0;
+  state.currentLesson.exerciseDone=0;
+  state.currentLesson.completed=false;
+  startExercise();
+}
+
+function goToNextLesson(){
+  document.getElementById('lessonCompleteOverlay').style.display='none';
+  startLesson(state._nextLessonIdx);
+}
+
+function closeLessonComplete(){
+  document.getElementById('lessonCompleteOverlay').style.display='none';
+  catSay('Kies een les om verder te oefenen! 💪');
+}
+
+function nextExercise(){
+  document.getElementById('resultOverlay').style.display='none';
+  state.currentExIndex=(state.currentExIndex+1)%state.currentLesson.exercises.length;
+  startExercise();
+}
+function closeResult(){
+  document.getElementById('resultOverlay').style.display='none';
+  state.active=false;
+  catSay('Kies een les om verder te oefenen! 💪');
+}
+
+// ═══════════════════════════════════════════════
+// CAT
+// ═══════════════════════════════════════════════
+function catSay(msg){
+  document.getElementById('catMessage').textContent=msg;
+  const cat=document.getElementById('catSvg');
+  cat.style.transform='scale(1.1)';
+  setTimeout(()=>cat.style.transform='scale(1)',300);
+}
+
+// ═══════════════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════════════
+function spawnConfetti(){
+  const c=document.getElementById('confettiContainer');
+  const cols=['#f39c12','#2980b9','#27ae60','#e74c3c','#8e44ad','#f1c40f'];
+  for(let i=0;i<60;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    p.style.cssText=`left:${Math.random()*100}%;background:${cols[Math.floor(Math.random()*cols.length)]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.5}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    c.appendChild(p);
+    setTimeout(()=>p.remove(),4000);
+  }
+}
+
+// Click anywhere on exercise to focus input
+document.getElementById('exerciseDisplay').addEventListener('click',()=>
+  document.getElementById('hiddenInput').focus());
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+function resetProgress(){
+  if(!confirm('Wil je alle voortgang wissen en opnieuw beginnen?')) return;
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  state = buildState();
+  document.getElementById('totalStars').textContent=0;
+  document.getElementById('totalBadges').textContent=0;
+  renderLevels();
+  renderBadges();
+  catSay('Voortgang gewist! Klaar voor een nieuw begin! 🐾');
+}
+
+buildKeyboard();
+renderLevels();
+renderBadges();
+document.getElementById('totalStars').textContent=state.totalStars;
+document.getElementById('totalBadges').textContent=Object.keys(state.badges).length;
+
+// Restore badges display
+Object.keys(state.badges).forEach(id=>{
+  const el=document.querySelector(`.badge-icon[title="${BADGES.find(b=>b.id===id)?.name}"]`);
+  if(el) el.classList.add('earned');
+});
+
+const hasProgress = state.totalLessons>0;
+catSay(hasProgress
+  ? `Welkom terug! 🐾 Je hebt al ${state.totalLessons} oefeningen gedaan. Kies een les om verder te gaan!`
+  : 'Hoi! Ik ben Snurr! 🐾 Alle lessen staan open — kies les 1 om te beginnen!');
+</script>
+</body>
+</html>
